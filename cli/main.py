@@ -38,6 +38,80 @@ app = typer.Typer(
     add_completion=True,  # Enable shell completion
 )
 
+# --- Codex OAuth auth subcommands ---
+auth_app = typer.Typer(help="Manage Codex OAuth credentials (ChatGPT Plus/Pro)")
+app.add_typer(auth_app, name="auth")
+
+
+@auth_app.command("login")
+def auth_login(
+    manual: bool = typer.Option(False, "--manual", help="Enter authorization code manually instead of browser auto-login"),
+):
+    """Login via ChatGPT OAuth and save local credentials."""
+    try:
+        from langchain_codex_oauth import ChatCodexOAuth
+    except ModuleNotFoundError:
+        console.print("[red]langchain-codex-oauth is not installed.[/red]")
+        console.print("Install it with: [bold]pip install langchain-codex-oauth[/bold]")
+        raise typer.Exit(1)
+
+    try:
+        from langchain_codex_oauth.auth import login as codex_login
+        codex_login(manual=manual)
+        console.print("[green]Login successful![/green]")
+    except ImportError:
+        # Fallback: instantiate the client to trigger auth flow
+        console.print("Initiating OAuth login flow...")
+        try:
+            client = ChatCodexOAuth(model="gpt-5.4")
+            _ = client  # Auth happens during construction
+            console.print("[green]Login successful![/green]")
+        except Exception as e:
+            console.print(f"[red]Login failed: {e}[/red]")
+            raise typer.Exit(1)
+    except Exception as e:
+        console.print(f"[red]Login failed: {e}[/red]")
+        raise typer.Exit(1)
+
+
+@auth_app.command("status")
+def auth_status():
+    """Show current OAuth credential status."""
+    try:
+        from langchain_codex_oauth.auth import get_credentials
+    except ImportError:
+        console.print("[yellow]langchain-codex-oauth is not installed or does not support credential status.[/yellow]")
+        raise typer.Exit(1)
+
+    try:
+        creds = get_credentials()
+        if creds:
+            console.print("[green]OAuth credentials found.[/green]")
+            if hasattr(creds, "account_id"):
+                console.print(f"  Account ID: {creds.account_id}")
+            if hasattr(creds, "expires_at"):
+                console.print(f"  Expires at: {creds.expires_at}")
+        else:
+            console.print("[yellow]No OAuth credentials found. Run 'tradingagents auth login' first.[/yellow]")
+    except Exception as e:
+        console.print(f"[red]Error checking credentials: {e}[/red]")
+        raise typer.Exit(1)
+
+
+@auth_app.command("logout")
+def auth_logout():
+    """Delete local OAuth credentials."""
+    try:
+        from langchain_codex_oauth.auth import logout as codex_logout
+        codex_logout()
+        console.print("[green]OAuth credentials deleted.[/green]")
+    except ImportError:
+        console.print("[yellow]langchain-codex-oauth is not installed or does not support logout.[/yellow]")
+        raise typer.Exit(1)
+    except Exception as e:
+        console.print(f"[red]Logout failed: {e}[/red]")
+        raise typer.Exit(1)
+
 
 # Create a deque to store recent messages with a maximum length
 class MessageBuffer:
@@ -578,7 +652,7 @@ def get_user_selections():
             )
         )
         thinking_level = ask_gemini_thinking_config()
-    elif provider_lower == "openai":
+    elif provider_lower in ("openai", "codex_oauth"):
         console.print(
             create_question_box(
                 "Step 8: Reasoning Effort",

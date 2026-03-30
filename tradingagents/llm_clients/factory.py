@@ -15,7 +15,7 @@ def create_llm_client(
     """Create an LLM client for the specified provider.
 
     Args:
-        provider: LLM provider (openai, anthropic, google, xai, ollama, openrouter)
+        provider: LLM provider (openai, anthropic, google, xai, ollama, openrouter, codex_oauth)
         model: Model name/identifier
         base_url: Optional base URL for API endpoint
         **kwargs: Additional provider-specific arguments
@@ -45,5 +45,9 @@ def create_llm_client(
 
     if provider_lower == "google":
         return GoogleClient(model, base_url, **kwargs)
+
+    if provider_lower == "codex_oauth":
+        from .codex_oauth_client import CodexOAuthClient
+        return CodexOAuthClient(model, base_url, **kwargs)
 
     raise ValueError(f"Unsupported LLM provider: {provider}")

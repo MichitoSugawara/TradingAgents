@@ -73,6 +73,19 @@ MODEL_OPTIONS: ProviderModeOptions = {
             ("NVIDIA Nemotron 3 Nano 30B (free)", "nvidia/nemotron-3-nano-30b-a3b:free"),
         ],
     },
+    "codex_oauth": {
+        "quick": [
+            ("GPT-5.4 - Latest frontier, 1M context", "gpt-5.4"),
+            ("GPT-5.2 - Strong reasoning, cost-effective", "gpt-5.2"),
+            ("GPT-5.2 Codex - Optimized for code", "gpt-5.2-codex"),
+        ],
+        "deep": [
+            ("GPT-5.4 - Latest frontier, 1M context", "gpt-5.4"),
+            ("GPT-5.3 Codex - Advanced code generation", "gpt-5.3-codex"),
+            ("GPT-5.2 - Strong reasoning, cost-effective", "gpt-5.2"),
+            ("GPT-5.2 Codex - Optimized for code", "gpt-5.2-codex"),
+        ],
+    },
     "ollama": {
         "quick": [
             ("Qwen3:latest (8B, local)", "qwen3:latest"),
