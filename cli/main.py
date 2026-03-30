@@ -36,7 +36,16 @@ app = typer.Typer(
     name="TradingAgents",
     help="TradingAgents CLI: Multi-Agents LLM Financial Trading Framework",
     add_completion=True,  # Enable shell completion
+    invoke_without_command=True,
 )
+
+
+@app.callback()
+def main(ctx: typer.Context):
+    """TradingAgents CLI: Multi-Agents LLM Financial Trading Framework."""
+    if ctx.invoked_subcommand is None:
+        run_analysis()
+
 
 # --- Codex OAuth auth subcommands ---
 auth_app = typer.Typer(help="Manage Codex OAuth credentials (ChatGPT Plus/Pro)")
